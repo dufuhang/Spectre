@@ -1,0 +1,4 @@
+/home/dufuhang/Spectre/build/CMakeFiles/rebuild_cache.dir
+/home/dufuhang/Spectre/build/CMakeFiles/edit_cache.dir
+/home/dufuhang/Spectre/build/CMakeFiles/spectre.dir
+/home/dufuhang/Spectre/build/CMakeFiles/test.dir
