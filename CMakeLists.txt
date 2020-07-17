@@ -6,6 +6,7 @@ set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -g -std=c++11 -Wall -Wno-depre
 
 set(LIB_SRC
     spectre/log.cc
+    spectre/util.cc
     )
 #创建共享库
 add_library(spectre SHARED ${LIB_SRC})

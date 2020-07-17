@@ -11,38 +11,21 @@
 #include <vector>
 #include <utility>  //make_pair
 
+#define SPECTRE_LOG_LEVEL(logger, level) \
+    if (logger->getLevel() <= level) \
+    spectre::LogEventWrap(spectre::LogEvent::ptr(new spectre::LogEvent(logger, level, \
+                    __FILE__, __LINE__, 0, spectre::GetThreadId(), \
+            spectre::GetFiberId(), time(0)))).getSS()
+
+#define SPECTRE_LOG_DEBUG(logger) SPECTRE_LOG_LEVEL(logger, spectre::LogLevel::DEBUG)
+#define SPECTRE_LOG_INFO(logger) SPECTRE_LOG_LEVEL(logger, spectre::LogLevel::INFO)
+#define SPECTRE_LOG_WARN(logger) SPECTRE_LOG_LEVEL(logger, spectre::LogLevel::WARN)
+#define SPECTRE_LOG_ERROR(logger) SPECTRE_LOG_LEVEL(logger, spectre::LogLevel::ERROR)
+#define SPECTRE_LOG_FATAL(logger) SPECTRE_LOG_LEVEL(logger, spectre::LogLevel::FATAL)
+
 namespace spectre
 {
     class Logger;
-    //日志事件。每个生成的日志都定义为LogEvent，日志所需要的字段和属性都定义在这里
-    class LogEvent
-    {
-        public:
-            typedef std::shared_ptr<LogEvent> ptr;
-            LogEvent(const char* file, int32_t line,
-                    uint32_t elapse,
-                    uint32_t thread_id,
-                    uint32_t fiber_id,
-                    uint64_t time);
-
-            const char* getFile() const { return m_file; }
-            int32_t getLine() const { return m_len; }
-            uint32_t getElapse() const { return m_elapse; }
-            int32_t getThreadId() const { return m_threadId; }
-            uint32_t getFiberId() const { return m_fiberId; }
-            uint64_t getTime() const { return m_time; }
-            const std::string getContent() const { return m_ss.str(); }
-
-            std::stringstream& getSS() { return m_ss; }
-        private:
-            const char* m_file = nullptr;   //文件名
-            int32_t m_len = 0;              //行号
-            uint32_t m_elapse = 0;          //程序开始到现在的毫秒数
-            int32_t m_threadId = 0;         //线程ID
-            uint32_t m_fiberId = 0;         //协程ID
-            uint64_t m_time;                //时间戳
-            std::stringstream m_ss;          //内容
-    };
 
     //日志级别
     class LogLevel
@@ -59,6 +42,56 @@ namespace spectre
             };
             static const char* ToString(Level level);
     };
+
+    //日志事件。每个生成的日志都定义为LogEvent，日志所需要的字段和属性都定义在这里
+    class LogEvent
+    {
+        public:
+            typedef std::shared_ptr<LogEvent> ptr;
+            LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level, 
+                    const char* file, int32_t line,
+                    uint32_t elapse,
+                    uint32_t thread_id,
+                    uint32_t fiber_id,
+                    uint64_t time);
+
+            const char* getFile() const { return m_file; }
+            int32_t getLine() const { return m_len; }
+            uint32_t getElapse() const { return m_elapse; }
+            int32_t getThreadId() const { return m_threadId; }
+            uint32_t getFiberId() const { return m_fiberId; }
+            uint64_t getTime() const { return m_time; }
+            const std::string getContent() const { return m_ss.str(); }
+            std::shared_ptr<Logger> getLogger() const { return m_logger; }
+            LogLevel::Level getLevel() const { return m_level; }
+
+            std::stringstream& getSS() { return m_ss; }
+            //void format(const char* fmt, ....);
+        private:
+            const char* m_file = nullptr;   //文件名
+            int32_t m_len = 0;              //行号
+            uint32_t m_elapse = 0;          //程序开始到现在的毫秒数
+            int32_t m_threadId = 0;         //线程ID
+            uint32_t m_fiberId = 0;         //协程ID
+            uint64_t m_time;                //时间戳
+            std::stringstream m_ss;          //内容
+
+            std::shared_ptr<Logger> m_logger;
+
+            LogLevel::Level m_level;
+    };
+
+    //封装LogEvent类
+    class LogEventWrap
+    {
+        public:
+            LogEventWrap(LogEvent::ptr e);
+            ~LogEventWrap();
+            std::stringstream& getSS();
+        private:
+            LogEvent::ptr m_event;
+    };
+
 
     //日志格式器
     class LogFormatter

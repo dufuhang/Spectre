@@ -28,6 +28,21 @@ namespace spectre
         return "UNKNOW";
     }
 
+    LogEventWrap::LogEventWrap(LogEvent::ptr e) : m_event(e)
+    {
+
+    }
+
+    LogEventWrap::~LogEventWrap()
+    {
+        m_event -> getLogger() -> log(m_event->getLevel(), m_event);
+    }
+
+   std::stringstream& LogEventWrap::getSS()
+    {
+        return m_event->getSS();
+    }
+
     class MessageFormatItem : public LogFormatter::FormatItem
     {
         public:
@@ -157,7 +172,19 @@ namespace spectre
             std::string m_string;
     };
 
-    LogEvent::LogEvent(const char* file, int32_t line,
+    class TabFormatItem : public LogFormatter::FormatItem
+    {
+        public:
+            TabFormatItem(const std::string& str = "") {}
+            void format(std::ostream& os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override
+            {
+                os << "\t"; 
+            }
+        private:
+            std::string m_string;
+    };
+
+    LogEvent::LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level, const char* file, int32_t line,
                     uint32_t elapse,
                     uint32_t thread_id,
                     uint32_t fiber_id,
@@ -167,14 +194,16 @@ namespace spectre
         m_elapse(elapse),
         m_threadId(thread_id),
         m_fiberId(fiber_id),
-        m_time(time)
+        m_time(time),
+        m_logger(logger),
+        m_level(level)
     {
 
     }
 
     Logger::Logger(const std::string& name) : m_name(name), m_level(LogLevel::DEBUG)
     {
-        m_formatter.reset(new LogFormatter("%d [%p] <%f:%l>     %m %n"));
+        m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S}%T%t%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"));
     }
 
     void Logger:: addAppender(LogAppender::ptr appender)
@@ -287,7 +316,7 @@ namespace spectre
     void LogFormatter::init()
     {
         //str, format, type
-        std::vector<std::tuple<std::string, std::string, int>> vec;
+        std::vector<std::tuple<std::string, std::string, int> > vec;
         std::string nstr;
         for (size_t i = 0; i < m_pattern.size(); ++i)
         {
@@ -315,8 +344,9 @@ namespace spectre
 
             while (n < m_pattern.size())
             {
-                if (!isalpha(m_pattern[n]) && m_pattern[n] != '{' && m_pattern[n] != '}')
+                if (!fmt_status && (!isalpha(m_pattern[n])) && m_pattern[n] != '{' && m_pattern[n] != '}')
                 {
+                    str = m_pattern.substr(i + 1, n - i -1);
                     break;
                 }
                 if (fmt_status == 0)
@@ -330,16 +360,26 @@ namespace spectre
                         continue;
                     }
                 }
-                if (fmt_status == 1)
+                else if (fmt_status == 1)
                 {
                     if (m_pattern[n] == '}')
                     {
                         fmt = m_pattern.substr(fmt_begin + 1, n - fmt_begin - 1);
-                        fmt_status = 2;
+                        //测试语句
+                        //std::cout << "#" << fmt << std::endl;
+                        fmt_status = 0;
+                        ++n;
                         break;
                     }
                 }
                 ++n;
+                if (n == m_pattern.size())
+                {
+                    if (str.empty())
+                    {
+                        str = m_pattern.substr(i + 1);
+                    }
+                }
             }
 
             if (fmt_status == 0)
@@ -349,7 +389,6 @@ namespace spectre
                     vec.push_back(std::make_tuple(nstr, std::string(), 0));
                     nstr.clear();
                 }
-                str = m_pattern.substr(i + 1, n - i - 1);
                 vec.push_back(std::make_tuple(str, fmt, 1));
                 i = n - 1;
             }
@@ -357,16 +396,6 @@ namespace spectre
             {
                 std::cout << "pattern parse error: " << m_pattern << "- " << m_pattern.substr(i) << std::endl;
                 vec.push_back(std::make_tuple("<<pattern_error>>", fmt, 0));
-            }
-            else if (fmt_status == 2)
-            {
-                if (!nstr.empty())
-                {
-                    vec.push_back(std::make_tuple(nstr, "", 0));
-                    nstr.clear();
-                }
-                vec.push_back(std::make_tuple(str, fmt, 1));
-                i = n - 1;
             }
         }
 
@@ -383,7 +412,9 @@ namespace spectre
         //%n -- 回车换行
         //%d -- 时间
         //%f -- 文件名
-        //%i -- 行号
+        //%l -- 行号
+        //%T -- 制表符
+        //%F -- 协程id
         static std::map<std::string, std::function<FormatItem::ptr(const std::string& str)> > s_format_items = 
         {
 #define XX(str, C)\
@@ -397,7 +428,9 @@ namespace spectre
             XX(n, NewLineFormatItem),
             XX(d, DateTimeFormatItem), 
             XX(f, FileFormatItem), 
-            XX(l, LineFormatItem)
+            XX(l, LineFormatItem),
+            XX(T, TabFormatItem),
+            XX(F, FiberIdFormatItem)
 #undef XX
         };
 
@@ -419,8 +452,10 @@ namespace spectre
                     m_items.push_back(it->second(std::get<1>(i)));
                 }
             }
-            std::cout << "(" << std::get<0>(i) << ") - (" << std::get<1>(i) << ") - (" << std::get<2>(i) << ")" << std::endl;
+            //测试语句
+            //std::cout << "(" << std::get<0>(i) << ") - (" << std::get<1>(i) << ") - (" << std::get<2>(i) << ")" << std::endl;
         }
-        std::cout << m_items.size() << std::endl;
+        //测试语句
+        //std::cout << m_items.size() << std::endl;
     }
 }

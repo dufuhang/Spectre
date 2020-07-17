@@ -4,3 +4,6 @@
 CMakeFiles/spectre.dir/spectre/log.cc.o: ../spectre/log.cc
 CMakeFiles/spectre.dir/spectre/log.cc.o: ../spectre/log.h
 
+CMakeFiles/spectre.dir/spectre/util.cc.o: ../spectre/util.cc
+CMakeFiles/spectre.dir/spectre/util.cc.o: ../spectre/util.h
+

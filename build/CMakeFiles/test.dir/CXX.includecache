@@ -26,9 +26,25 @@ vector
 utility
 -
 
+/home/dufuhang/Spectre/spectre/util.h
+pthread.h
+-
+unistd.h
+-
+sys/types.h
+-
+sys/syscall.h
+-
+stdio.h
+-
+stdint.h
+-
+
 /home/dufuhang/Spectre/tests/test.cc
 iostream
 -
 ../spectre/log.h
 /home/dufuhang/Spectre/spectre/log.h
+../spectre/util.h
+/home/dufuhang/Spectre/spectre/util.h
 

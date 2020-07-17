@@ -5,6 +5,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/dufuhang/Spectre/spectre/log.cc" "/home/dufuhang/Spectre/build/CMakeFiles/spectre.dir/spectre/log.cc.o"
+  "/home/dufuhang/Spectre/spectre/util.cc" "/home/dufuhang/Spectre/build/CMakeFiles/spectre.dir/spectre/util.cc.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

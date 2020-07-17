@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/spectre.dir/spectre/log.cc.o"
+  "CMakeFiles/spectre.dir/spectre/util.cc.o"
   "../lib/libspectre.pdb"
   "../lib/libspectre.so"
 )

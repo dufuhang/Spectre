@@ -166,6 +166,33 @@ spectre/log.cc.s:
 	$(MAKE) -f CMakeFiles/spectre.dir/build.make CMakeFiles/spectre.dir/spectre/log.cc.s
 .PHONY : spectre/log.cc.s
 
+spectre/util.o: spectre/util.cc.o
+
+.PHONY : spectre/util.o
+
+# target to build an object file
+spectre/util.cc.o:
+	$(MAKE) -f CMakeFiles/spectre.dir/build.make CMakeFiles/spectre.dir/spectre/util.cc.o
+.PHONY : spectre/util.cc.o
+
+spectre/util.i: spectre/util.cc.i
+
+.PHONY : spectre/util.i
+
+# target to preprocess a source file
+spectre/util.cc.i:
+	$(MAKE) -f CMakeFiles/spectre.dir/build.make CMakeFiles/spectre.dir/spectre/util.cc.i
+.PHONY : spectre/util.cc.i
+
+spectre/util.s: spectre/util.cc.s
+
+.PHONY : spectre/util.s
+
+# target to generate assembly for a file
+spectre/util.cc.s:
+	$(MAKE) -f CMakeFiles/spectre.dir/build.make CMakeFiles/spectre.dir/spectre/util.cc.s
+.PHONY : spectre/util.cc.s
+
 tests/test.o: tests/test.cc.o
 
 .PHONY : tests/test.o
@@ -206,6 +233,9 @@ help:
 	@echo "... spectre/log.o"
 	@echo "... spectre/log.i"
 	@echo "... spectre/log.s"
+	@echo "... spectre/util.o"
+	@echo "... spectre/util.i"
+	@echo "... spectre/util.s"
 	@echo "... tests/test.o"
 	@echo "... tests/test.i"
 	@echo "... tests/test.s"
