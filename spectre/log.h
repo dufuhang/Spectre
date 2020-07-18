@@ -10,6 +10,9 @@
 #include <fstream>
 #include <vector>
 #include <utility>  //make_pair
+#include <stdarg.h> //va_list等
+#include <map>
+#include "singleton.h"
 
 #define SPECTRE_LOG_LEVEL(logger, level) \
     if (logger->getLevel() <= level) \
@@ -22,6 +25,18 @@
 #define SPECTRE_LOG_WARN(logger) SPECTRE_LOG_LEVEL(logger, spectre::LogLevel::WARN)
 #define SPECTRE_LOG_ERROR(logger) SPECTRE_LOG_LEVEL(logger, spectre::LogLevel::ERROR)
 #define SPECTRE_LOG_FATAL(logger) SPECTRE_LOG_LEVEL(logger, spectre::LogLevel::FATAL)
+
+#define SPECTRE_LOG_FMT_LEVEL(logger, level, fmt, ...) \
+    if (logger->getLevel() <= level) \
+    spectre::LogEventWrap(spectre::LogEvent::ptr(new spectre::LogEvent(logger, level, \
+                    __FILE__, __LINE__, 0, spectre::GetThreadId(), \
+                    spectre::GetThreadId(), time(0)))).getEvent()->format(fmt, __VA_ARGS__)
+
+#define SPECTRE_LOG_FMT_DEBUG(logger, fmt, ...) SPECTRE_LOG_FMT_LEVEL(logger, spectre::LogLevel::DEBUG, fmt, __VA_ARGS__)
+#define SPECTRE_LOG_FMT_INFO(logger, fmt, ...) SPECTRE_LOG_FMT_LEVEL(logger, spectre::LogLevel::INFO, fmt, __VA_ARGS__)
+#define SPECTRE_LOG_FMT_WARN(logger, fmt, ...) SPECTRE_LOG_FMT_LEVEL(logger, spectre::LogLevel::WARN, fmt, __VA_ARGS__)
+#define SPECTRE_LOG_FMT_ERROR(logger, fmt, ...) SPECTRE_LOG_FMT_LEVEL(logger, spectre::LogLevel::ERROR, fmt, __VA_ARGS__)
+#define SPECTRE_LOG_FMT_FATAL(logger, fmt, ...) SPECTRE_LOG_FMT_LEVEL(logger, spectre::LogLevel::FATAL, fmt, __VA_ARGS__)
 
 namespace spectre
 {
@@ -66,7 +81,8 @@ namespace spectre
             LogLevel::Level getLevel() const { return m_level; }
 
             std::stringstream& getSS() { return m_ss; }
-            //void format(const char* fmt, ....);
+            void format(const char* fmt, ...);
+            void format(const char* fmt, va_list al);
         private:
             const char* m_file = nullptr;   //文件名
             int32_t m_len = 0;              //行号
@@ -88,6 +104,7 @@ namespace spectre
             LogEventWrap(LogEvent::ptr e);
             ~LogEventWrap();
             std::stringstream& getSS();
+            LogEvent::ptr getEvent() const { return m_event; }
         private:
             LogEvent::ptr m_event;
     };
@@ -127,9 +144,12 @@ namespace spectre
             //定义为纯虚函数，此类变为抽象基类
             virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) = 0;
             //设置格式
-            void setFomatter(LogFormatter::ptr val) { m_formatter = val; }
+            void setFormatter(LogFormatter::ptr val) { m_formatter = val; }
             //获取格式
             LogFormatter::ptr getFormatter() const { return m_formatter; }
+
+            LogLevel::Level getLevel() const { return m_level; }
+            void setLevel(LogLevel::Level val) { m_level = val; }
         protected:  //protected,可以是子类也能访问成员变量
             //这里要初始化，否则可能会赋予一个随机值，导致后续输出时判断失误，无法输出
             LogLevel::Level m_level = LogLevel::DEBUG;
@@ -187,6 +207,19 @@ namespace spectre
             std::string m_filename;
             std::ofstream m_filestream;
     };
+    class LoggerManager
+    {
+        public:
+            LoggerManager();
+            Logger::ptr getLogger(const std::string& name);
+            //初始化
+            void init();
+        private:
+            std::map<std::string, Logger::ptr> m_logger;
+            Logger::ptr m_root;
+    };
+
+typedef spectre::Singleton<LoggerManager> Loggermgr;
 }
 
 #endif  //__SPECTRE_LOG_H__
