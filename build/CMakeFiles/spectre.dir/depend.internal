@@ -4,6 +4,7 @@
 CMakeFiles/spectre.dir/spectre/log.cc.o
  /home/dufuhang/Spectre/spectre/log.cc
  /home/dufuhang/Spectre/spectre/log.h
+ /home/dufuhang/Spectre/spectre/singleton.h
 CMakeFiles/spectre.dir/spectre/util.cc.o
  /home/dufuhang/Spectre/spectre/util.cc
  /home/dufuhang/Spectre/spectre/util.h

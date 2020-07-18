@@ -39,6 +39,14 @@ vector
 -
 utility
 -
+stdarg.h
+-
+map
+-
+singleton.h
+/home/dufuhang/Spectre/spectre/singleton.h
+
+/home/dufuhang/Spectre/spectre/singleton.h
 
 /home/dufuhang/Spectre/spectre/util.cc
 util.h
